@@ -1,0 +1,4 @@
+strncmp: s1="abcd", s2="abc", n=4 expected=1 actual=100
+strncmp: s1="hello", s2="world", n=3 expected=-1 actual=-15
+strncmp: s1="Case", s2="case", n=4 expected=-1 actual=-32
+strncmp: s1="prefix", s2="prefixsuffix", n=10 expected=-1 actual=-115
