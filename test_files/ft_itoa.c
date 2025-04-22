@@ -1,0 +1,11 @@
+itoa:0
+itoa:1
+itoa:-1
+itoa:42
+itoa:-42
+itoa:2147483647
+itoa:-2147483648
+itoa:123456789
+itoa:-123456789
+itoa:1000
+itoa:-1000

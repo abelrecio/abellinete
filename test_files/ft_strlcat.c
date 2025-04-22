@@ -1,0 +1,11 @@
+strlcat:,abc,5
+strlcat:foo,bar,0
+strlcat:foo,bar,1
+strlcat:foo,bar,4
+strlcat:foo,bar,6
+strlcat:foo,bar,10
+strlcat:longstring,test,5
+strlcat:test,longstring,15
+strlcat:empty,,5
+strlcat:dst,empty,5
+strlcat:short,long,3
