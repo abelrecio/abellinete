@@ -2,11 +2,11 @@ strncmp:,,0
 strncmp:abc,abc,3
 strncmp:abc,abd,2
 strncmp:abc,abd,3
-strncmp:abcd,abc,4
+abcd,abc,4
 strncmp:abcd,abc,3
 strncmp:hello,hellp,5
-strncmp:hello,world,3
-strncmp:Case,case,4
+hello,world,3
+Case,case,4
 strncmp:prefix,prefixsuffix,6
-strncmp:prefix,prefixsuffix,10
+prefix,prefixsuffix,10
 strncmp:foo,bar,0
