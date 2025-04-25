@@ -1,0 +1,1 @@
+Abellinete funciona arrastrando los archivos a la carpeta de abellinete, dando permisos de ejecución a abellinete y ejecutando el bash de abellinete. Funcionará abellinete en tu ordenador? seguramente no. Abellinete.
