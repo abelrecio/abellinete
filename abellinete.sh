@@ -4,7 +4,7 @@ TEST_ARGS=("$@")
 
 comprobar_norminette() {
     echo "Comprobando normas de estilo con norminette..."
-    norminette $(ls *.c | grep -v "main.c") > errnorm.txt 2>&1
+    norminette $(ls *.c | grep -v '^test_.*\.c$') > errnorm.txt 2>&1
     if grep -q -v "OK!" errnorm.txt; then
         echo "Errores de estilo detectados. Mira errnorm.txt."
         return 1

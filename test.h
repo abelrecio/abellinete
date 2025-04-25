@@ -54,15 +54,14 @@ void    test_putchar_fd(char c, int fd);
 void    test_putstr_fd(const char *s, int fd);
 void    test_putendl_fd(const char *s, int fd);
 void    test_putnbr_fd(int n, int fd);
-void    test_lstnew(const char *spec);
-void    test_lstadd_front(const char *spec, const char *newc);
-void    test_lstadd_back(const char *spec, const char *newc);
-void    test_lstsize(const char *spec);
-void    test_lstlast(const char *spec);
-void    test_lstdelone(const char *spec, const char *del_name);
-void    test_lstclear(const char *spec, const char *del_name);
-void    test_lstiter(const char *spec, const char *func_name);
-void    test_lstmap(const char *spec, const char *func_name, const char *del_name);
+void    test_lstnew(void *content);
+void test_lstadd_front(void);
+void test_lstsize(void);
+void test_lstlast(void);
+void test_lstadd_back(void);
+void	test_lstdelone(void);
+void test_lstclear(void);
+void test_lstiter(void);
+void test_lstmap(void);
 
 #endif
-

@@ -78,6 +78,24 @@ static void what_function(char *line)
             test_strdup(args);
         else if (strcmp(func, "itoa") == 0)
             test_itoa(atoi(args));
+	else if (strcmp(func, "lstnew") == 0)
+		test_lstnew((void *)args);
+	else if (strcmp(func, "lst_add_front") == 0)
+		test_lstadd_front();    
+	else if (strcmp(func, "lstsize") == 0)
+		test_lstsize();
+	else if(strcmp(func, "lstlast") == 0)
+		test_lstlast();
+	else if(strcmp(func, "lstadd_back") == 0)
+		test_lstadd_back();
+	else if(strcmp(func, "lstdelone") == 0)
+		test_lstdelone();
+	else if(strcmp(func, "lstclear") == 0)
+		test_lstclear();
+	else if(strcmp(func, "lstiter") == 0)
+		test_lstiter();
+	else if(strcmp(func, "lstmap") == 0)
+		test_lstmap();
 	return;
     }
 
