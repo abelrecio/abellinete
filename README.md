@@ -31,4 +31,4 @@ Para probar nuevos test se pueden añadir a los test de la carpeta de test en el
                 ⬛⬛⬜⬜⬜⬜⬜⬛⬛⬛⬛⬜⬜⬜⬜⬜⬛⬛            
                     ⬛⬛⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬛⬛                
                         ⬛⬛⬛⬜⬜⬜⬜⬛⬛⬛                    
-    echo "                          ⬛⬛⬛⬛                          "
+                              ⬛⬛⬛⬛                          
