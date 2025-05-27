@@ -2,16 +2,14 @@
 
 TEST_ARGS=("$@")
 
-# Colores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m' 
 
 comprobar_norminette() {
     echo -e "${BLUE}Comprobando normas de estilo con norminette...${NC}"
-    # Asegura que la carpeta errores existe
     mkdir -p ../errores
     cd entrega
     norminette $(ls *.c *.h | grep -v '^test_.*\.c$') > ../errores/errnorm.txt 2>&1
@@ -28,19 +26,16 @@ comprobar_norminette() {
 preparar_entorno() {
     echo -e "${BLUE}Preparando entorno de compilación...${NC}"
     
-    # Verificar que existe la carpeta entrega
     if [ ! -d "entrega" ]; then
         echo -e "${RED}Error: No existe la carpeta 'entrega'${NC}"
         return 1
     fi
     
-    # Verificar que existe el test de ft_printf
     if [ ! -f "ft_printf/test.c" ]; then
         echo -e "${RED}Error: No existe ft_printf/test.c${NC}"
         return 1
     fi
     
-    # Copiar test a entrega
     cp ft_printf/test.c entrega/test_ft_printf.c
     if [ $? -ne 0 ]; then
         echo -e "${RED}Error: No se pudo copiar el test${NC}"
@@ -54,7 +49,6 @@ preparar_entorno() {
 limpiar_entorno() {
     echo -e "${BLUE}Limpiando entorno...${NC}"
     cd entrega 2>/dev/null && {
-        # Eliminar archivos de test y compilación
         rm -f test_ft_printf.c
         rm -f test_ft_printf_sanitizer
         rm -f test_ft_printf_valgrind  
@@ -89,17 +83,14 @@ compilar_ft_printf() {
     
     cd entrega
     
-    # Verificar que tenemos libft.a
     if [ ! -f "libft.a" ]; then
         echo -e "${RED}Error: No se encuentra libft.a en entrega/${NC}"
         cd ..
         return 1
     fi
     
-    # Compilar ft_printf con todos sus archivos
     local ft_printf_files="ft_printf_main.c ft_printf_char.c ft_printf_charstr.c ft_printf_format.c ft_printf_number.c ft_printf_number_utils.c ft_printf_parser.c ft_printf_pointer.c ft_printf_prefix.c ft_printf_string.c ft_printf_utils.c"
     
-    # Verificar que existen todos los archivos necesarios
     for file in $ft_printf_files; do
         if [ ! -f "$file" ]; then
             echo -e "${RED}Error: No se encuentra $file${NC}"
@@ -110,7 +101,6 @@ compilar_ft_printf() {
     
     echo -e "${YELLOW}Archivos a compilar: $ft_printf_files test_ft_printf.c${NC}"
     
-    # Compilar: flags estrictos para archivos fuente, más permisivos para test
     cc $flags_extra -Wall -Wextra -Werror $ft_printf_files -Wno-error test_ft_printf.c libft.a -o $ejecutable
     
     local exit_code=$?
@@ -213,7 +203,6 @@ test_libft_sanitizer() {
     echo -e "${BLUE}Compilando libft con AddressSanitizer...${NC}"
     cd libft
     
-    # Obtener archivos fuente (sin test)
     local source_files=$(ls *.c | grep -v '^test_')
     local test_files=$(ls *.c | grep '^test_')
     
@@ -243,7 +232,6 @@ test_libft_valgrind() {
     echo -e "${BLUE}Compilando libft para Valgrind...${NC}"
     cd libft
     
-    # Obtener archivos fuente (sin test)
     local source_files=$(ls *.c | grep -v '^test_')
     local test_files=$(ls *.c | grep '^test_')
     
@@ -273,7 +261,6 @@ test_libft_normal() {
     echo -e "${BLUE}Compilando libft normalmente...${NC}"
     cd libft
     
-    # Obtener archivos fuente (sin test)
     local source_files=$(ls *.c | grep -v '^test_')
     local test_files=$(ls *.c | grep '^test_')
     
@@ -299,7 +286,6 @@ test_libft_normal() {
     read -p "Pulsa enter para continuar..."
 }
 
-# Verificar estructura inicial
 verificar_estructura() {
     local errores=0
     
@@ -325,7 +311,6 @@ verificar_estructura() {
     fi
 }
 
-# Menú de ft_printf
 menu_ft_printf() {
     while true; do
         clear
@@ -384,7 +369,6 @@ menu_ft_printf() {
     done
 }
 
-# Menú de libft
 menu_libft() {
     while true; do
         clear
@@ -443,7 +427,6 @@ menu_libft() {
     done
 }
 
-# Menú principal
 while true; do
     verificar_estructura
     limpiar_entorno

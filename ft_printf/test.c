@@ -19,7 +19,6 @@ size_t stats_count = 0;
 FILE *error_log = NULL;
 int failed_tests = 0;
 
-// Versión mejorada con Unicode siguiendo tu lógica
 void print_summary(void) {
     size_t total_passed = 0, total_failed = 0;
     
@@ -56,7 +55,6 @@ void print_summary_ascii(void) {
 
     printf("\n[RESUMEN POR CATEGORIAS]\n");
     
-    // Línea superior
     printf("+");
     for (int i = 0; i < CAT_WIDTH + 2; ++i) printf("-");
     printf("+");
@@ -65,10 +63,8 @@ void print_summary_ascii(void) {
     for (int i = 0; i < KO_WIDTH + 2; ++i) printf("-");
     printf("+\n");
     
-    // Cabecera
     printf("| %-*s | %*s | %*s |\n", CAT_WIDTH, "Categoria", OK_WIDTH, "OK", KO_WIDTH, "KO");
     
-    // Línea separadora
     printf("+");
     for (int i = 0; i < CAT_WIDTH + 2; ++i) printf("-");
     printf("+");
@@ -77,7 +73,6 @@ void print_summary_ascii(void) {
     for (int i = 0; i < KO_WIDTH + 2; ++i) printf("-");
     printf("+\n");
     
-    // Datos
     for (size_t i = 0; i < stats_count; i++) {
         printf("| %-*s | %*zu | %*zu |\n", 
                CAT_WIDTH, stats[i].name, 
@@ -87,7 +82,6 @@ void print_summary_ascii(void) {
         total_failed += stats[i].failed;
     }
     
-    // Línea separadora antes del total
     printf("+");
     for (int i = 0; i < CAT_WIDTH + 2; ++i) printf("-");
     printf("+");
@@ -175,7 +169,6 @@ int compare_outputs(const char *test_name, const char *format, int ft_ret, int o
     compare_outputs(test_name, format_str, ft_ret, printf_ret); \
 } while(0)
 
-// Debes tener la firma de ft_printf visible para el linker
 int ft_printf(const char *format, ...);
 
 int main(void) {
