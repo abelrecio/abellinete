@@ -1,0 +1,16 @@
+ft_printf_char.c: OK!
+ft_printf_charstr.c: OK!
+ft_printf_format.c: OK!
+ft_printf.h: OK!
+ft_printf_main.c: OK!
+ft_printf_number.c: OK!
+ft_printf_number_utils.c: OK!
+ft_printf_parser.c: OK!
+ft_printf_pointer.c: OK!
+ft_printf_prefix.c: OK!
+ft_printf_string.c: OK!
+ft_printf_utils.c: OK!
+libft.h: Error!
+Error: TOO_MANY_TAB         (line:  21, col:   1):	Extra tabs for indent level
+Error: TOO_FEW_TAB          (line:  41, col:   1):	Missing tabs for indent level
+Error: TOO_FEW_TAB          (line:  74, col:   1):	Missing tabs for indent level

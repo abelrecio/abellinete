@@ -1,0 +1,10 @@
+ft_printf ERROR LOG - Tests que fallaron
+=========================================
+
+[FAIL] flag # octal: formato='%#o' ft_printf=15, printf=18
+[FAIL] octal básico: formato='%o' ft_printf=8, printf=10
+[FAIL] octal valor 0: formato='%o val 0' ft_printf=10, printf=11
+[FAIL] octal flag 0: formato='%08o' ft_printf=15, printf=23
+[FAIL] octal máximo: formato='%o max' ft_printf=10, printf=21
+
+=== FIN DEL LOG ===
