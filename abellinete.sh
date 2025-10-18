@@ -745,7 +745,7 @@ while true; do
     echo "            ║                              ║"
     echo "            ║  Selecciona el proyecto:     ║"
     echo "            ║                              ║"
-    echo "            ║  1) FT_PRINTF(averiado)      ║"
+    echo "            ║  1) FT_PRINTF                ║"
     echo "            ║  2) LIBFT                    ║"
     echo "            ║  3) GNL                      ║"
     echo "            ║  4) Salir                    ║"
