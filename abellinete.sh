@@ -201,88 +201,153 @@ test_ft_printf_normal() {
 
 test_libft_sanitizer() {
     echo -e "${BLUE}Compilando libft con AddressSanitizer...${NC}"
-    cd libft
     
-    local source_files=$(ls *.c | grep -v '^test_')
-    local test_files=$(ls *.c | grep '^test_')
+    echo -e "${YELLOW}Compilando biblioteca libft...${NC}"
+    make -C entrega/libft fclean
+    make -C entrega/libft all
+    make -C entrega/libft bonus
     
-    echo -e "${YELLOW}Compilando archivos fuente con flags estrictos: $source_files${NC}"
-    echo -e "${YELLOW}Compilando archivos test con flags permisivos: $test_files${NC}"
-    
-    cc -fsanitize=address -Wall -Wextra -Werror $source_files -Wno-error $test_files -o test_libft_sanitizer -lbsd
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Falló compilación libft con Sanitizer.${NC}"
-        cd ..
+        echo -e "${RED}Falló la compilación de libft con make.${NC}"
         read -p "Pulsa enter para continuar..."
         return 1
     fi
-
-    echo -e "${BLUE}Ejecutando: ./libft/test_libft_sanitizer ${TEST_ARGS[*]}${NC}"
-    ./test_libft_sanitizer "${TEST_ARGS[@]}"
+    
+    echo -e "${YELLOW}Compilando tests con AddressSanitizer...${NC}"
+    cc -fsanitize=address -g \
+        -Wall -Wextra -Werror \
+        libft/test_*.c \
+        entrega/libft/libft.a \
+        -I entrega/libft \
+        -o libft/test_libft_sanitizer \
+        -lbsd
+    
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Errores en libft Sanitizer.${NC}"
-    else
-        echo -e "${GREEN}OK libft con Sanitizer.${NC}"
+        echo -e "${RED}Falló compilación de tests con Sanitizer.${NC}"
+        read -p "Pulsa enter para continuar..."
+        return 1
     fi
+    
+    echo -e "${BLUE}Ejecutando tests con AddressSanitizer...${NC}"
+    cd libft
+    ./test_libft_sanitizer "${TEST_ARGS[@]}"
+    local exit_code=$?
     cd ..
+    
+    if [ $exit_code -ne 0 ]; then
+        echo -e "${RED}Errores detectados con AddressSanitizer.${NC}"
+    else
+        echo -e "${GREEN}OK libft con AddressSanitizer - Sin errores de memoria.${NC}"
+    fi
+    
+    rm -f libft/test_libft_sanitizer
     read -p "Pulsa enter para continuar..."
 }
 
 test_libft_valgrind() {
     echo -e "${BLUE}Compilando libft para Valgrind...${NC}"
-    cd libft
     
-    local source_files=$(ls *.c | grep -v '^test_')
-    local test_files=$(ls *.c | grep '^test_')
+    echo -e "${YELLOW}Compilando biblioteca libft...${NC}"
+    make -C entrega/libft fclean
+    make -C entrega/libft all
+    make -C entrega/libft bonus
     
-    echo -e "${YELLOW}Compilando archivos fuente con flags estrictos: $source_files${NC}"
-    echo -e "${YELLOW}Compilando archivos test con flags permisivos: $test_files${NC}"
-    
-    cc -Wall -Wextra -Werror $source_files -Wno-error $test_files -o test_libft_valgrind -lbsd
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Falló compilación libft para Valgrind.${NC}"
-        cd ..
+        echo -e "${RED}Falló la compilación de libft con make.${NC}"
         read -p "Pulsa enter para continuar..."
         return 1
     fi
-
-    echo -e "${BLUE}Ejecutando: valgrind --leak-check=full --error-exitcode=1 ./libft/test_libft_valgrind ${TEST_ARGS[*]}${NC}"
-    valgrind --leak-check=full --error-exitcode=1 --track-origins=yes ./test_libft_valgrind "${TEST_ARGS[@]}"
+    
+    echo -e "${YELLOW}Compilando tests para Valgrind (con símbolos de debug)...${NC}"
+    cc -g -O0 \
+        -Wall -Wextra -Werror \
+        libft/test_*.c \
+        entrega/libft/libft.a \
+        -I entrega/libft \
+        -o libft/test_libft_valgrind \
+        -lbsd
+    
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Fugas detectadas en libft por Valgrind.${NC}"
-    else
-        echo -e "${GREEN}Sin fugas libft con Valgrind.${NC}"
+        echo -e "${RED}Falló compilación de tests para Valgrind.${NC}"
+        read -p "Pulsa enter para continuar..."
+        return 1
     fi
+    
+    echo -e "${BLUE}Ejecutando Valgrind con detección completa de fugas...${NC}"
+    cd libft
+    valgrind --leak-check=full \
+             --show-leak-kinds=all \
+             --track-origins=yes \
+             --error-exitcode=1 \
+             --suppressions=/dev/null \
+             ./test_libft_valgrind "${TEST_ARGS[@]}"
+    local exit_code=$?
     cd ..
+    
+    if [ $exit_code -ne 0 ]; then
+        echo -e "${RED}Fugas de memoria detectadas por Valgrind.${NC}"
+        echo -e "${YELLOW}Revisa el output anterior para ver los detalles.${NC}"
+    else
+        echo -e "${GREEN}Sin fugas de memoria - Valgrind limpio.${NC}"
+    fi
+    
+    rm -f libft/test_libft_valgrind
     read -p "Pulsa enter para continuar..."
 }
 
 test_libft_normal() {
     echo -e "${BLUE}Compilando libft normalmente...${NC}"
-    cd libft
     
-    local source_files=$(ls *.c | grep -v '^test_')
-    local test_files=$(ls *.c | grep '^test_')
+    echo -e "${YELLOW}Compilando biblioteca libft con make...${NC}"
+    make -C entrega/libft fclean
+    make -C entrega/libft all
+    make -C entrega/libft bonus
     
-    echo -e "${YELLOW}Compilando archivos fuente con flags estrictos: $source_files${NC}"
-    echo -e "${YELLOW}Compilando archivos test con flags permisivos: $test_files${NC}"
-    
-    cc -Wall -Wextra -Werror $source_files -Wno-error $test_files -o test_libft_normal -lbsd
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Falló compilación libft normal.${NC}"
-        cd ..
+        echo -e "${RED}Falló la compilación de libft con make.${NC}"
         read -p "Pulsa enter para continuar..."
         return 1
     fi
-
-    echo -e "${BLUE}Ejecutando: ./libft/test_libft_normal ${TEST_ARGS[*]}${NC}"
-    ./test_libft_normal "${TEST_ARGS[@]}"
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Todas las pruebas libft pasaron.${NC}"
-    else
-        echo -e "${YELLOW}Pruebas libft fallaron (exit code $?).${NC}"
+    
+    if [ ! -f "entrega/libft/libft.a" ]; then
+        echo -e "${RED}Error: No se encontró entrega/libft/libft.a${NC}"
+        echo -e "${YELLOW}Verifica que el Makefile esté configurado correctamente.${NC}"
+        read -p "Pulsa enter para continuar..."
+        return 1
     fi
+    
+    echo -e "${YELLOW}Compilando tests con la biblioteca...${NC}"
+    cc -Wall -Wextra -Werror \
+        libft/test_*.c \
+        entrega/libft/libft.a \
+        -I entrega/libft \
+        -o libft/test_libft_normal \
+        -lbsd
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Falló compilación de tests.${NC}"
+        echo -e "${YELLOW}Posibles causas:${NC}"
+        echo -e "  - Falta el archivo libft.h en entrega/libft/"
+        echo -e "  - Los tests esperan funciones que no están implementadas"
+        echo -e "  - Problemas con la biblioteca bsd (instala libbsd-dev si falta)"
+        read -p "Pulsa enter para continuar..."
+        return 1
+    fi
+    
+    echo -e "${BLUE}Ejecutando tests: ./test_libft_normal ${TEST_ARGS[*]}${NC}"
+    cd libft
+    ./test_libft_normal "${TEST_ARGS[@]}"
+    local exit_code=$?
     cd ..
+    
+    if [ $exit_code -eq 0 ]; then
+        echo -e "${GREEN}Todas las pruebas de libft pasaron correctamente.${NC}"
+    else
+        echo -e "${YELLOW}Algunas pruebas fallaron (exit code $exit_code).${NC}"
+        echo -e "${YELLOW}Revisa el output anterior para ver qué tests fallaron.${NC}"
+    fi
+    
+    rm -f libft/test_libft_normal
     read -p "Pulsa enter para continuar..."
 }
 
