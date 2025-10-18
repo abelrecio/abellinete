@@ -1,5 +1,5 @@
+#include "../entrega/libft.h"
 #include <stdio.h>
-#include "libft.h"
 #include "test.h"
 #include <string.h>
 

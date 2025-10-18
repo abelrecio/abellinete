@@ -1,3 +1,4 @@
+#include "../entrega/libft.h"
 #include "test.h"
 #include <stdio.h>
 #include <stdlib.h>

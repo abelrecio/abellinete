@@ -1,7 +1,7 @@
+#include "../entrega/libft.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "libft.h"
 #include "test.h"
 
 void test_memset(const char *init, int c, size_t n)

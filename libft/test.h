@@ -2,6 +2,7 @@
 #define TEST_H
 
 #include <stddef.h>
+#include "../entrega/libft.h"
 
 typedef struct {
     char   name[32];

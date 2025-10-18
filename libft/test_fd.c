@@ -1,8 +1,8 @@
+#include "../entrega/libft.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "libft.h"
 #include "test.h"
 
 void    test_putchar_fd(char c, int fd)

@@ -1,7 +1,7 @@
+#include "../entrega/libft.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "libft.h"
 #include "test.h"
 
 char	*make_expected_substr(char const *s, unsigned int start, size_t len)
