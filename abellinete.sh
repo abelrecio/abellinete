@@ -74,128 +74,129 @@ limpiar_entorno() {
     echo -e "${GREEN}Entorno limpiado${NC}"
 }
 
-compilar_ft_printf() {
-    local modo=$1
-    local ejecutable=$2
-    local flags_extra="$3"
-    
-    echo -e "${BLUE}Compilando ft_printf en modo ${modo}...${NC}"
-    
-    cd entrega
-    
-    if [ ! -f "libft.a" ]; then
-        echo -e "${RED}Error: No se encuentra libft.a en entrega/${NC}"
-        cd ..
-        return 1
-    fi
-    
-    local ft_printf_files="ft_printf_main.c ft_printf_char.c ft_printf_charstr.c ft_printf_format.c ft_printf_number.c ft_printf_number_utils.c ft_printf_parser.c ft_printf_pointer.c ft_printf_prefix.c ft_printf_string.c ft_printf_utils.c"
-    
-    for file in $ft_printf_files; do
-        if [ ! -f "$file" ]; then
-            echo -e "${RED}Error: No se encuentra $file${NC}"
-            cd ..
-            return 1
-        fi
-    done
-    
-    echo -e "${YELLOW}Archivos a compilar: $ft_printf_files test_ft_printf.c${NC}"
-    
-    cc $flags_extra -Wall -Wextra -Werror $ft_printf_files -Wno-error test_ft_printf.c libft.a -o $ejecutable
-    
-    local exit_code=$?
-    cd ..
-    
-    if [ $exit_code -ne 0 ]; then
-        echo -e "${RED}Error en compilación ${modo}${NC}"
-        return 1
-    fi
-    
-    echo -e "${GREEN}Compilación ${modo} exitosa${NC}"
-    return 0
-}
-
 test_ft_printf_sanitizer() {
-    preparar_entorno || return 1
+    echo -e "${BLUE}Compilando ft_printf con AddressSanitizer...${NC}"
     
-    comprobar_norminette
-    [ $? -ne 0 ] && echo
+    echo -e "${YELLOW}Compilando biblioteca ft_printf...${NC}"
+    make -C entrega/ft_printf fclean
+    make -C entrega/ft_printf all
+    make -C entrega/ft_printf bonus    
     
-    compilar_ft_printf "AddressSanitizer" "test_ft_printf_sanitizer" "-fsanitize=address"
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Falló compilación con Sanitizer.${NC}"
+        echo -e "${RED}Falló la compilación de ft_printf con make.${NC}"
         read -p "Pulsa enter para continuar..."
         return 1
     fi
-
-    echo -e "${BLUE}Ejecutando: ./entrega/test_ft_printf_sanitizer ${TEST_ARGS[*]}${NC}"
-    cd entrega
+    
+    echo -e "${YELLOW}Compilando test con AddressSanitizer...${NC}"
+    cc -fsanitize=address -g \
+        ft_printf/test.c \
+        entrega/ft_printf/libftprintf.a \
+        -I entrega/ft_printf \
+        -o ft_printf/test_ft_printf_sanitizer
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Falló compilación de test con Sanitizer.${NC}"
+        read -p "Pulsa enter para continuar..."
+        return 1
+    fi
+    
+    echo -e "${BLUE}Ejecutando test con AddressSanitizer...${NC}"
+    cd ft_printf
     ./test_ft_printf_sanitizer "${TEST_ARGS[@]}"
     local exit_code=$?
     cd ..
     
-    if [ $exit_code -ne 0 ]; then
-        echo -e "${RED}Errores detectados por AddressSanitizer.${NC}"
-    else
-        echo -e "${GREEN}OK con AddressSanitizer.${NC}"
-    fi
     
+    rm -f ft_printf/test_ft_printf_sanitizer
     read -p "Pulsa enter para continuar..."
 }
 
 test_ft_printf_valgrind() {
-    preparar_entorno || return 1
+    echo -e "${BLUE}Compilando ft_printf para Valgrind...${NC}"
     
-    comprobar_norminette
-    [ $? -ne 0 ] && echo
-
-    compilar_ft_printf "Valgrind" "test_ft_printf_valgrind" ""
+    echo -e "${YELLOW}Compilando biblioteca ft_printf...${NC}"
+    make -C entrega/ft_printf fclean
+    make -C entrega/ft_printf all
+    make -C entrega/ft_printf bonus    
+    
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Falló compilación para Valgrind.${NC}"
+        echo -e "${RED}Falló la compilación de ft_printf con make.${NC}"
         read -p "Pulsa enter para continuar..."
         return 1
     fi
-
-    echo -e "${BLUE}Ejecutando: valgrind --leak-check=full --error-exitcode=1 ./entrega/test_ft_printf_valgrind ${TEST_ARGS[*]}${NC}"
-    cd entrega
-    valgrind --leak-check=full --error-exitcode=1 --track-origins=yes ./test_ft_printf_valgrind "${TEST_ARGS[@]}"
+    
+    echo -e "${YELLOW}Compilando test para Valgrind (con símbolos de debug)...${NC}"
+    cc -g -O0 \
+        ft_printf/test.c \
+        entrega/ft_printf/libftprintf.a \
+        -I entrega/ft_printf \
+        -o ft_printf/test_ft_printf_valgrind
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Falló compilación de test para Valgrind.${NC}"
+        read -p "Pulsa enter para continuar..."
+        return 1
+    fi
+    
+    echo -e "${BLUE}Ejecutando Valgrind con detección completa de fugas...${NC}"
+    cd ft_printf
+    valgrind --leak-check=full \
+             --show-leak-kinds=all \
+             --track-origins=yes \
+             --error-exitcode=1 \
+             ./test_ft_printf_valgrind "${TEST_ARGS[@]}"
     local exit_code=$?
     cd ..
     
-    if [ $exit_code -ne 0 ]; then
-        echo -e "${RED}Fugas o errores detectados por Valgrind.${NC}"
-    else
-        echo -e "${GREEN}Sin fugas con Valgrind.${NC}"
-    fi
-    
+    rm -f ft_printf/test_ft_printf_valgrind
     read -p "Pulsa enter para continuar..."
 }
 
 test_ft_printf_normal() {
-    preparar_entorno || return 1
+    echo -e "${BLUE}Compilando ft_printf normalmente...${NC}"
     
-    comprobar_norminette
-    [ $? -ne 0 ] && echo
-
-    compilar_ft_printf "normal" "test_ft_printf_normal" ""
+    echo -e "${YELLOW}Compilando biblioteca ft_printf con make...${NC}"
+    make -C entrega/ft_printf fclean
+    make -C entrega/ft_printf all
+    make -C entrega/ft_printf bonus    
     if [ $? -ne 0 ]; then
-        echo -e "${RED}Falló compilación normal.${NC}"
+        echo -e "${RED}Falló la compilación de ft_printf con make.${NC}"
         read -p "Pulsa enter para continuar..."
         return 1
     fi
-
-    echo -e "${BLUE}Ejecutando: ./entrega/test_ft_printf_normal ${TEST_ARGS[*]}${NC}"
-    cd entrega
+    
+    if [ ! -f "entrega/ft_printf/libftprintf.a" ]; then
+        echo -e "${RED}Error: No se encontró entrega/ft_printf/libftprintf.a${NC}"
+        echo -e "${YELLOW}Verifica que el Makefile esté configurado correctamente.${NC}"
+        read -p "Pulsa enter para continuar..."
+        return 1
+    fi
+    
+    echo -e "${YELLOW}Compilando test con la biblioteca...${NC}"
+    cc  \
+        ft_printf/test.c \
+        entrega/ft_printf/libftprintf.a \
+        -I entrega/ft_printf \
+        -o ft_printf/test_ft_printf_normal
+    
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Falló compilación del test.${NC}"
+        echo -e "${YELLOW}Posibles causas:${NC}"
+        echo -e "  - Falta el archivo ft_printf.h en entrega/ft_printf/"
+        echo -e "  - El test espera funciones que no están implementadas"
+        echo -e "  - Errores de sintaxis en el código"
+        read -p "Pulsa enter para continuar..."
+        return 1
+    fi
+    
+    echo -e "${BLUE}Ejecutando test: ./test_ft_printf_normal ${TEST_ARGS[*]}${NC}"
+    cd ft_printf
     ./test_ft_printf_normal "${TEST_ARGS[@]}"
     local exit_code=$?
     cd ..
-    
-    if [ $exit_code -eq 0 ]; then
-        echo -e "${GREEN}Todas las pruebas pasaron.${NC}"
-    else
-        echo -e "${YELLOW}Pruebas fallaron (exit code $exit_code).${NC}"
-    fi
-    
+     
+    rm -f ft_printf/test_ft_printf_normal
     read -p "Pulsa enter para continuar..."
 }
 
@@ -376,6 +377,217 @@ verificar_estructura() {
     fi
 }
 
+menu_gnl() {
+    local SRC_DIR="entrega/get_next_line"
+    local TEST_DIR="gnl"
+
+    # Verificar que existe el directorio de código fuente
+    if [ ! -d "$SRC_DIR" ]; then
+        echo "Error: No se encuentra el directorio $SRC_DIR/"
+        return 1
+    fi
+
+    # Verificar que existe el directorio de tests
+    if [ ! -d "$TEST_DIR" ]; then
+        echo "Error: No se encuentra el directorio $TEST_DIR/"
+        return 1
+    fi
+
+    mostrar_menu_principal() {
+        clear
+        echo "  ⬛⬛                🟩🟩🟩🟩🟩🟩🟩🟩                ⬛⬛  "
+        echo "⬛⬜⬜⬛⬛        🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩        ⬛⬛⬜⬜⬛"
+        echo "⬛🟧⬜⬜⬜⬛⬛  🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩  ⬛⬛⬜⬜⬜🟧⬛"
+        echo "⬛🟧🟧⬜⬜⬜⬜⬜🟥🟥🟥🟥🟩🟩🟩🟩🟩🟩🟥🟥🟥🟥⬜⬜⬜⬜⬜🟧🟧⬛"
+        echo "⬛🟧🟧⬜⬜⬜⬜🟥🟥🟥🟥🟥🟥🟩🟩🟩🟩🟥🟥🟥🟥🟥🟥⬜⬜⬜⬜🟧🟧⬛"
+        echo "⬛🟧🟧⬜⬜🟥🟥⬜⬜⬜⬜⬜🟥🟫🟫🟫🟫🟥⬜⬜⬜⬜⬜🟥🟥⬜⬜🟧🟧⬛"
+        echo "⬛🟧🟧⬜⬜🟥🟥⬜⬜⬜⬜⬜🟥🟫🟫🟫🟫🟥⬜⬜⬜⬜⬜🟥🟥⬜⬜🟧🟧⬛"
+        echo "  ⬛🟧🟧🟫🟥🟥🟥🟥🟥🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟥🟥🟥🟥🟥🟫🟧🟧⬛  "
+        echo "  ⬛🟧🟧🟫🟫🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟫🟫🟧🟧⬛  "
+        echo "    ⬛🟫🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟩🟫⬛    "
+        echo "    🟩🟩🟩🟩🟩🟩🟩🟩🟧🟧🟧🟧🟧🟧🟧🟧🟧🟧🟩🟩🟩🟩🟩🟩🟩🟩    "
+        echo "  🟩🟩🟩🟩🟩🟧⬛⬛⬛🟧🟧🟧⬜⬜⬜⬜🟧🟧🟧⬛⬛⬛🟧🟩🟩🟩🟩🟩  "
+        echo "🟩🟩🟩🟩⬛🟧⬛🟧🟧🟫⬛🟧⬜⬜⬜⬜⬜⬜🟧⬛🟫🟧🟧⬛🟧⬛🟩🟩🟩🟩"
+        echo "🟩🟩🟩🟩⬛🟧🟧🟧🟧🟧🟫⬛⬜⬜⬜⬜⬜⬜⬛🟫🟧🟧🟧🟧🟧⬛🟩🟩🟩🟩"
+        echo "      ⬛⬜🟧🟧🟧🟧🟧🟧🟧🟧⬜⬜⬜⬜🟧🟧🟧🟧🟧🟧🟧🟧⬜⬛      "
+        echo "  ⬛⬛⬜⬜🟧🟧🟧⬛⬛🟧🟧🟧⬜⬜⬜⬜🟧🟧🟧⬛⬛🟧🟧🟧⬜⬜⬛⬛  "
+        echo "  ⬛⬜⬜⬜🟧🟧⬛🟧🟧⬛🟧🟧⬜⬜⬜⬜🟧🟧⬛🟧🟧⬛🟧🟧⬜⬜⬜⬛  "
+        echo "    ⬛⬜⬜⬜🟧🟧🟧🟧🟧🟧⬜⬜⬜⬜⬜⬜🟧🟧🟧🟧🟧🟧⬜⬜⬜⬛    "
+        echo "      ⬛⬜⬜⬜🟧🟧🟧🟧⬜⬜⬜⬜⬜⬜⬜⬜🟧🟧🟧🟧⬜⬜⬜⬛      "
+        echo "  ⬛⬛⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬛⬛  "
+        echo "  ⬛⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜🟫🟫🟫🟫🟫🟫⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬛  "
+        echo "    ⬛⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜🟫🟫🟫🟫⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬛    "
+        echo "      ⬛⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜🟫🟫⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬛      "
+        echo "        ⬛⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬛        "
+        echo "          ⬛⬜⬜⬜⬜⬜⬜⬛⬜⬜⬜⬜⬛⬜⬜⬜⬜⬜⬜⬛          "
+        echo "            ⬛⬛⬜⬜⬜⬜⬜⬛⬛⬛⬛⬜⬜⬜⬜⬜⬛⬛            "
+        echo "                ⬛⬛⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬛⬛                "
+        echo "                    ⬛⬛⬛⬜⬜⬜⬜⬛⬛⬛                    "
+        echo "                          ⬛⬛⬛⬛                          "
+        echo "========================================"
+        echo "           ABELINETTE GNL"
+        echo "========================================"
+    }
+
+    mostrar_menu_principal
+
+    echo "Elige tamaño de BUFFER_SIZE:"
+    echo "1. BUFFER_SIZE = 1"
+    echo "2. BUFFER_SIZE = 42"
+    echo "3. BUFFER_SIZE = 1000"
+    echo "4. BUFFER_SIZE personalizado"
+    read -p "Opción: " buffer_option
+
+    case $buffer_option in
+        1) BUFFER_SIZE=1 ;;
+        2) BUFFER_SIZE=42 ;;
+        3) BUFFER_SIZE=1000 ;;
+        4)
+            read -p "Introduce BUFFER_SIZE: " BUFFER_SIZE
+            if ! [[ "$BUFFER_SIZE" =~ ^[0-9]+$ ]] || [ "$BUFFER_SIZE" -le 0 ] || [ "$BUFFER_SIZE" -gt 2147483647 ]; then
+                echo "BUFFER_SIZE inválido (debe ser un número entre 1 y 2147483647)"
+                return 1
+            fi
+            ;;
+        *)
+            echo "Opción inválida"
+            return 1
+            ;;
+    esac
+
+    echo
+    echo "Elige herramienta de debugging:"
+    echo "1. Valgrind (completo)"
+    echo "2. Address Sanitizer (rápido)"
+    read -p "Opción: " debug_option
+
+    case $debug_option in
+        1)
+            COMPILE_FLAGS="-Wall -Wextra -Werror -D BUFFER_SIZE=$BUFFER_SIZE"
+            DEBUG_CMD="valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --track-fds=yes --show-reachable=yes --error-exitcode=1"
+            ;;
+        2)
+            COMPILE_FLAGS="-Wall -Wextra -Werror -D BUFFER_SIZE=$BUFFER_SIZE -fsanitize=address -fsanitize=undefined -fno-sanitize-recover -g3"
+            DEBUG_CMD=""
+            ;;
+        *)
+            echo "Opción inválida"
+            return 1
+            ;;
+    esac
+
+    while true; do
+        echo
+        echo "1. Archivo vacío - busca errores de lectura sin contenido [cualquier buffer]"
+        echo "2. Solo un '\n' - prueba manejo de línea vacía válida [cualquier buffer]"
+        echo "3. 41 chars sin '\n' final - EOF sin newline [mejor con 42]"
+        echo "4. 41 chars + '\n' + resto - lectura tras newline [mejor con 42]"
+        echo "5. Exacto BUFFER_SIZE sin '\n' - límite de buffer [requiere 42]"
+        echo "6. BUFFER_SIZE + '\n' + resto - desbordamiento de buffer [requiere 42]"
+        echo "7. BUFFER_SIZE+1 sin '\n' - buffer insuficiente [requiere 42]"
+        echo "8. BUFFER_SIZE+1 + '\n' + resto - múltiples lecturas [requiere 42]"
+        echo "9. Cinco '\n' seguidos - líneas vacías repetidas [mejor con 1]"
+        echo "10. Varias líneas, última sin '\n' - EOF mixto [cualquier buffer]"
+        echo "11. Varias líneas completas - lectura secuencial [cualquier buffer]"
+        echo "12. Líneas largas/vacías alternas, sin '\n' final [mejor con 1 o 42]"
+        echo "13. Líneas largas/vacías alternas, con '\n' final [mejor con 1 o 42]"
+        echo "14. Línea gigante sin '\n' - múltiples buffers [mejor con 1]"
+        echo "15. Línea gigante con '\n' - gestión memoria grande [mejor con 1]"
+        echo "16. Prueba general de funcionalidad básica [cualquier buffer]"
+        echo "17. Texto real extenso - rendimiento y memoria [mejor con 1 o 1000]"
+        echo "18. No fd, hago close en el archivo y lo mando a gnl [cualquier buffer]"
+        echo "19. stdin.txt"
+        echo "20. PRUEBA DEL TEST, EN LA 20, POR ALGÚN MOTIVO"
+        echo "21. Salto sin contenido - termina tras \\n [cualquier buffer]"
+        echo "22. Múltiplos exactos - líneas de BUFFER_SIZE exacto [requiere 42]"
+        echo "23. Muchas líneas vacías - stress test con líneas vacías [mejor con 1]"
+        echo "24. Solo espacios y tabs - caracteres whitespace [cualquier buffer]"
+        echo "25. Caracteres especiales - UTF-8, acentos, emojis [mejor con 1]"
+        echo "26. Fin abrupto - archivo truncado sin \\n [cualquier buffer]"
+        echo "27. Stress fragmentación - tamaños variables de línea [requiere 1]"
+        echo "28. Todos los test (redirigir la salida)"
+        echo "0. Salir"
+
+        read -p "Elige test: " option
+
+        case $option in
+            0) return 0 ;;
+            1) file="vacio.txt" ;;
+            2) file="solo_salto.txt" ;;
+            3) file="linea_41_sin_salto.txt" ;;
+            4) file="linea_41_con_salto.txt" ;;
+            5) file="linea_42_sin_salto.txt" ;;
+            6) file="linea_42_con_salto.txt" ;;
+            7) file="linea_43_sin_salto.txt" ;;
+            8) file="linea_43_con_salto.txt" ;;
+            9) file="cinco_saltos_vacios.txt" ;;
+            10) file="multiples_sin_salto_final.txt" ;;
+            11) file="multiples_con_salto_final.txt" ;;
+            12) file="alternas_termina_sin_salto.txt" ;;
+            13) file="alternas_termina_con_salto.txt" ;;
+            14) file="linea_gigante_sin_salto.txt" ;;
+            15) file="linea_gigante_con_salto.txt" ;;
+            16) file="archivo.txt" ;;
+            17) file="el_quijote.txt" ;;
+            18) file="no_fd.txt" ;;
+            19) file="stdin" ;;
+            20) file="bonus.txt" ;;
+            21) file="salto_sin_contenido.txt" ;;
+            22) file="buffer_multiple.txt" ;;
+            23) file="muchas_lineas_vacias.txt" ;;
+            24) file="solo_espacios.txt" ;;
+            25) file="caracteres_especiales.txt" ;;
+            26) file="fin_abrupto.txt" ;;
+            27) file="stress_fragmentacion.txt" ;;
+            28)
+                echo "Compilando desde $SRC_DIR/..."
+                gcc $COMPILE_FLAGS $SRC_DIR/*.c $TEST_DIR/main.c
+                if [ $? -ne 0 ]; then
+                    echo "Error de compilación"
+                    continue
+                fi
+
+                test_files=(
+                    "vacio.txt" "solo_salto.txt" "linea_41_sin_salto.txt" "linea_41_con_salto.txt"
+                    "linea_42_sin_salto.txt" "linea_42_con_salto.txt" "linea_43_sin_salto.txt"
+                    "linea_43_con_salto.txt" "cinco_saltos_vacios.txt" "multiples_sin_salto_final.txt"
+                    "multiples_con_salto_final.txt" "alternas_termina_sin_salto.txt" "alternas_termina_con_salto.txt"
+                    "linea_gigante_sin_salto.txt" "linea_gigante_con_salto.txt" "archivo.txt"
+                    "el_quijote.txt" "no_fd.txt" "salto_sin_contenido.txt" "buffer_multiple.txt"
+                    "muchas_lineas_vacias.txt" "solo_espacios.txt" "caracteres_especiales.txt"
+                    "fin_abrupto.txt" "stress_fragmentacion.txt"
+                )
+
+                for test_file in "${test_files[@]}"; do
+                    if [ -f "$TEST_DIR/test/$test_file" ]; then
+                        echo "=== Ejecutando test: $test_file ==="
+                        $DEBUG_CMD ./a.out "$TEST_DIR/test/$test_file"
+                        echo
+                    else
+                        echo "=== Archivo no encontrado: $TEST_DIR/test/$test_file ==="
+                    fi
+                done
+                ;;
+            *) echo "Opción inválida"; continue ;;
+        esac
+
+        if [ "$option" != "0" ] && [ "$option" != "28" ]; then
+            echo "Compilando desde $SRC_DIR/..."
+            gcc $COMPILE_FLAGS $SRC_DIR/*.c $TEST_DIR/main.c
+            if [ $? -ne 0 ]; then
+                echo "Error de compilación"
+                continue
+            fi
+
+            if [ -f "$TEST_DIR/test/$file" ]; then
+                $DEBUG_CMD ./a.out "$TEST_DIR/test/$file"
+            else
+                echo "Error: No se encuentra el archivo $TEST_DIR/test/$file"
+            fi
+        fi
+    done
+}
+
 menu_ft_printf() {
     while true; do
         clear
@@ -527,25 +739,27 @@ while true; do
     echo "                          ⬛⬛⬛⬛                          "
     echo ""
     echo "            ╔══════════════════════════════╗"
-    echo "            ║       ABELINETTE v3.0        ║"
+    echo "            ║       ABELINETTE v4.0        ║"
     echo "            ║ ~pero, todavía vas por el 5? ║"
     echo "            ╠══════════════════════════════╣"
     echo "            ║                              ║"
     echo "            ║  Selecciona el proyecto:     ║"
     echo "            ║                              ║"
-    echo "            ║  1) FT_PRINTF                ║"
+    echo "            ║  1) FT_PRINTF(averiado)      ║"
     echo "            ║  2) LIBFT                    ║"
-    echo "            ║  3) Salir                    ║"
+    echo "            ║  3) GNL                      ║"
+    echo "            ║  4) Salir                    ║"
     echo "            ║                              ║"
     echo "            ╚══════════════════════════════╝"
     echo ""
-    printf "                    Opción [1-3]: "
+    printf "                    Opción [1-4]: "
     read opt
 
     case $opt in
         1) menu_ft_printf ;;
         2) menu_libft ;;
-        3) echo -e "\n${GREEN}Saliendo...${NC}"; limpiar_entorno; exit 0 ;;
+	3) menu_gnl ;;
+        4) echo -e "\n${GREEN}Saliendo...${NC}"; limpiar_entorno; exit 0 ;;
         *) echo -e "\n${RED}Opción inválida.${NC}"; read -p "Pulsa enter para continuar..." ;;
     esac
 done
