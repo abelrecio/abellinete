@@ -206,7 +206,6 @@ test_libft_sanitizer() {
     echo -e "${YELLOW}Compilando biblioteca libft...${NC}"
     make -C entrega/libft fclean
     make -C entrega/libft all
-    make -C entrega/libft bonus
     
     if [ $? -ne 0 ]; then
         echo -e "${RED}Falló la compilación de libft con make.${NC}"
@@ -236,9 +235,10 @@ test_libft_sanitizer() {
     cd ..
     
     if [ $exit_code -ne 0 ]; then
-        echo -e "${RED}Errores detectados con AddressSanitizer.${NC}"
+        echo -e "${RED}Errores de memoria o tests KO detectados (exit code $exit_code).${NC}"
+        echo -e "${YELLOW}Revisa el output anterior y errores/error.log.${NC}"
     else
-        echo -e "${GREEN}OK libft con AddressSanitizer - Sin errores de memoria.${NC}"
+        echo -e "${GREEN}OK libft con AddressSanitizer - Sin errores de memoria y todos los tests OK.${NC}"
     fi
     
     rm -f libft/test_libft_sanitizer
@@ -251,7 +251,6 @@ test_libft_valgrind() {
     echo -e "${YELLOW}Compilando biblioteca libft...${NC}"
     make -C entrega/libft fclean
     make -C entrega/libft all
-    make -C entrega/libft bonus
     
     if [ $? -ne 0 ]; then
         echo -e "${RED}Falló la compilación de libft con make.${NC}"
@@ -286,10 +285,10 @@ test_libft_valgrind() {
     cd ..
     
     if [ $exit_code -ne 0 ]; then
-        echo -e "${RED}Fugas de memoria detectadas por Valgrind.${NC}"
-        echo -e "${YELLOW}Revisa el output anterior para ver los detalles.${NC}"
+        echo -e "${RED}Fugas de memoria o tests KO detectados (exit code $exit_code).${NC}"
+        echo -e "${YELLOW}Revisa el output anterior y errores/error.log para ver los detalles.${NC}"
     else
-        echo -e "${GREEN}Sin fugas de memoria - Valgrind limpio.${NC}"
+        echo -e "${GREEN}Sin fugas de memoria y todos los tests OK - Valgrind limpio.${NC}"
     fi
     
     rm -f libft/test_libft_valgrind
@@ -302,7 +301,6 @@ test_libft_normal() {
     echo -e "${YELLOW}Compilando biblioteca libft con make...${NC}"
     make -C entrega/libft fclean
     make -C entrega/libft all
-    make -C entrega/libft bonus
     
     if [ $? -ne 0 ]; then
         echo -e "${RED}Falló la compilación de libft con make.${NC}"
@@ -345,7 +343,7 @@ test_libft_normal() {
         echo -e "${GREEN}Todas las pruebas de libft pasaron correctamente.${NC}"
     else
         echo -e "${YELLOW}Algunas pruebas fallaron (exit code $exit_code).${NC}"
-        echo -e "${YELLOW}Revisa el output anterior para ver qué tests fallaron.${NC}"
+        echo -e "${YELLOW}Revisa la tabla anterior y errores/error.log para ver qué tests fallaron.${NC}"
     fi
     
     rm -f libft/test_libft_normal
@@ -381,13 +379,11 @@ menu_gnl() {
     local SRC_DIR="entrega/get_next_line"
     local TEST_DIR="gnl"
 
-    # Verificar que existe el directorio de código fuente
     if [ ! -d "$SRC_DIR" ]; then
         echo "Error: No se encuentra el directorio $SRC_DIR/"
         return 1
     fi
 
-    # Verificar que existe el directorio de tests
     if [ ! -d "$TEST_DIR" ]; then
         echo "Error: No se encuentra el directorio $TEST_DIR/"
         return 1

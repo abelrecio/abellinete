@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 static char map_to_upper(unsigned int i, char c)
 {
@@ -212,6 +213,7 @@ int	main(int argc, char *argv[])
 	DIR				*d;
 	struct dirent	*ent;
 	FILE			*f;
+	size_t			total_failed;
 
 	if (chdir("test_files") != 0)
 	{
@@ -219,6 +221,8 @@ int	main(int argc, char *argv[])
 		return (EXIT_FAILURE);
 	}
 	remove("error.log");
+	mkdir("../../errores", 0755);
+	remove("../../errores/error.log");
 	if (argc == 1)
 	{
 		d = opendir(".");
@@ -257,6 +261,16 @@ int	main(int argc, char *argv[])
 		}
 	}
 	print_summary();
+	total_failed = 0;
+	for (size_t i = 0; i < stats_count; i++)
+		total_failed += stats[i].failed;
+	rename("error.log", "../../errores/error.log");
 	free(stats);
+	if (total_failed > 0)
+	{
+		printf("\nHay %zu KO. Revisa errores/error.log para los detalles.\n",
+			total_failed);
+		return (EXIT_FAILURE);
+	}
 	return (EXIT_SUCCESS);
 }
